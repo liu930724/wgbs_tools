@@ -39,6 +39,7 @@ commands = [
     'compare_betas',
     'homog',
     'find_markers',
+    'find_markers2',
     'add_cpg_counts',
     'frag_len',
     'split_by_allele',

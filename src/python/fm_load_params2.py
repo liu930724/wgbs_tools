@@ -73,8 +73,6 @@ class MFParams:
             raise IllegalArgumentError('min_bp must be non negative')
         if self.max_bp < 2:
             raise IllegalArgumentError('max_bp must larger than 1')
-        if self.chunk_size < 1:
-            raise IllegalArgumentError('chunk_size must larger than 1')
 
         # validate the [0.0, 1.0] fractions
         for key in ('na_rate_tg', 'na_rate_bg', 'delta', 'tg_quant', \
@@ -90,7 +88,7 @@ class MFParams:
             raise IllegalArgumentError()
 
         # validate input files
-        for key in ('blocks_path', 'groups_file'):
+        for key in ('methly_profile', 'groups_file'):
             val = getattr(self, key)
             if val is None:
                 eprint(f'[wt fm] missing required parameter: {key}')
@@ -99,33 +97,14 @@ class MFParams:
             # change path to absolute path
             setattr(self, key, op.abspath(val))
 
-
-        # validate betas
-        if (self.betas is None and self.beta_list_file is None) or \
-           (self.betas is not None and self.beta_list_file is not None):
-            eprint(f'[wt fm] Exactly one of the following must be specified: betas, beta_list_file')
-            raise IllegalArgumentError()
-
-        if self.beta_list_file:
-            validate_single_file(self.beta_list_file)
-            with open(self.beta_list_file, 'r') as f:
-                self.betas = [l.strip() for l in f.readlines()]
-        validate_file_list(self.betas)
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description='Find differentially methylated blocks')
     parser.add_argument('--config_file', '-p',
             help=f'find_markers config file see {COS_CONF_PATH} for example')
-    parser.add_argument('--blocks_path', '-b', help='Blocks bed path.')
+    parser.add_argument('--methly_profile', '-m', help='methylation profile path.')
     parser.add_argument('--groups_file', '-g', help='csv file of groups')
-    parser.add_argument('--methly_profile', '-m', help='methylation profile file')
     parser.add_argument('--targets', nargs='+', help='find markers only for these groups (OR relation)')
     parser.add_argument('--background', nargs='+', help='find markers only against these groups (AND relation)')
-    betas_group = parser.add_mutually_exclusive_group()
-    betas_group.add_argument('--betas', nargs='+',
-            help='beta file paths. files not in the group files are ignored')
-    betas_group.add_argument('--beta_list_file', help='file with a list of beta file paths.')
     parser.add_argument('-o', '--out_dir', help='Output directory')
     parser.add_argument('--min_bp', type=int)
     parser.add_argument('--max_bp', type=int)
@@ -133,8 +112,6 @@ def parse_args():
     parser.add_argument('--max_cpg', type=int)
     parser.add_argument('--delta', type=float,
             help='Filter markers by beta values delta. range: [0.0, 1.0]')
-    parser.add_argument('-c', '--min_cov', type=int,
-            help='Minimal number of binary observations in block coverage to be considered')
     parser.add_argument('--only_hyper', action='store_true',
             help='Only consider hyper-methylated markers')
     parser.add_argument('--only_hypo', action='store_true',
@@ -159,8 +136,6 @@ def parse_args():
             help='rate of samples with insufficient coverage allowed in target samples')
     parser.add_argument('--na_rate_bg', type=float,
             help='rate of samples with insufficient coverage allowed in background samples')
-
-    parser.add_argument('--chunk_size', type=int, help='Number of blocks to load on each step')
     parser.add_argument('--verbose', '-v', action='store_true')
     add_multi_thread_args(parser)
     args = parser.parse_args()
