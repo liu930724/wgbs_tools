@@ -368,7 +368,7 @@ class MarkerFinder:
         tf['region'] = bed2reg(tf)
         cols_to_dump = ['chr', 'start', 'end', 'startCpG', 'endCpG',
                         'target', 'region', 'lenCpG', 'bp', 'tg_mean',
-                        'bg_mean', 'delta_means', 'delta_quants', 'bg_delta_max', 'tg_delta_min', 'bg_delta_min', 'tg_delta_max'
+                        'bg_mean', 'delta_means', 'delta_quants', 'bg_delta_max', 'tg_delta_min', 'bg_delta_min', 'tg_delta_max',
                         'ttest', 'direction']
         if 'anno' in list(tf.columns) and 'gene' in list(tf.columns):
             cols_to_dump += ['anno', 'gene']
